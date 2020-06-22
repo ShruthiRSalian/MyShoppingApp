@@ -13,6 +13,8 @@ target 'MyShoppingApp' do
   pod 'Swinject'
   pod 'SwinjectStoryboard'
   pod 'SwinjectAutoregistration' 
+  pod 'RxSwift'
+  pod 'RxCocoa'
 
   target 'MyShoppingAppTests' do
     inherit! :search_paths

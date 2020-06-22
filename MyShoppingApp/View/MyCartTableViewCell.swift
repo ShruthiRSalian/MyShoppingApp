@@ -8,21 +8,26 @@
 
 import UIKit
 
+protocol MyCartListDelegate : class {
+    func removeItemFromCart(at index: Int)
+}
+
 class MyCartTableViewCell: UITableViewCell {
     
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var descriptionLabel: UILabel!
     @IBOutlet weak var itemImageView: UIImageView!
+    
+    var index: Int = 0
+    weak var delegate: MyCartListDelegate?
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
+    @IBAction func removeFromCart(sender: UIButton) {
+        delegate?.removeItemFromCart(at: index)
     }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
+    
+    func configureWithItem(item: Item) {
+        nameLabel.text = item.name
+        descriptionLabel.text = "$ \(item.price ?? 0)"
+        itemImageView.downloaded(from: item.imageUrl ?? "")
     }
-
 }

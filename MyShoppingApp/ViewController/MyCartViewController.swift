@@ -7,43 +7,55 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
+import RxRelay
 
 class MyCartViewController: UIViewController {
     
-    var items = [Item]()
-
+    var mycartViewModel = MyCartViewModel()
+    let disposeBag = DisposeBag()
+    
+    @IBOutlet weak var checkOutButton: UIButton!
+    @IBOutlet weak var resetButton: UIButton!
+    @IBOutlet weak var myCartTableView: UITableView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
-        items = CartItems.shared.getItems()
+        setUpObserver()
+        setUpCellConfig()
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
-}
-
-extension MyCartViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return CartItems.shared.items.count
+    //Setting up observer to update checkout and reset button state. Value is taken from cart item count
+    func setUpObserver() {
+        CartItems.shared.items.asObservable()
+            .subscribe(onNext: {
+                [unowned self] item in
+                self.checkOutButton.isEnabled = item.count > 0 ? true : false
+                self.resetButton.isEnabled = item.count > 0 ? true : false
+            })
+        .disposed(by: disposeBag)
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let cell = tableView.dequeueReusableCell(withIdentifier: "myCartTableViewCell") as? MyCartTableViewCell {
-            cell.nameLabel.text = items[indexPath.row].name
-            cell.descriptionLabel.text = items[indexPath.row].description
-            cell.itemImageView.downloaded(from: items[indexPath.row].imageUrl ?? "")
-            return cell
-        }
-        return UITableViewCell()
+    // Populates tableview with items. Done using Rx instance. NO need of delegates
+    func setUpCellConfig() {
+        CartItems.shared.items.bind(to: myCartTableView
+            .rx.items(cellIdentifier: "myCartTableViewCell",
+                      cellType: MyCartTableViewCell.self)) {
+                        row, item, cell in
+                        cell.index = row
+                        cell.delegate = self.mycartViewModel
+                        cell.configureWithItem(item: item)
+        }.disposed(by: disposeBag)
+    }
+    
+    @IBAction func checkoutButtonTapped(_ sender: Any) {
+        let vc = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(identifier: "checkoutViewController")
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    @IBAction func resetButtonTapped(_ sender: Any) {
+        mycartViewModel.reset()
     }
 }

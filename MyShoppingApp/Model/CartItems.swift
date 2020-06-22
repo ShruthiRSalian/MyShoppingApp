@@ -7,19 +7,31 @@
 //
 
 import Foundation
+import RxSwift
+import RxRelay
 
 class CartItems {
-    static var shared = CartItems()
+    static let shared = CartItems()
+    var items: BehaviorRelay<[Item]> = BehaviorRelay(value: [])
+}
+
+// MARK: Computed properties
+extension CartItems {
     
-    var items = Set<Item>()
-    
-    func getItems() -> [Item] {
-        return Array(items)
+    //Since items is BehaviorRelay type access it using value
+    var totalCost: Float {
+        let value = items.value.reduce(0) { (currentTotal, item) in
+            return currentTotal + (item.price ?? 0)
+        }
+        return value
     }
     
-    private init() {
+    //Since items is BehaviorRelay type access it using value
+    var itemCountString: String {
+        guard items.value.count > 0 else {
+            return "0 item"
+        }
         
+        return "\(items.value.count) items"
     }
-    
-    
 }

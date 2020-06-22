@@ -26,16 +26,10 @@ class ItemListTableViewCell: UITableViewCell {
     @IBAction func addToCart(sender: UIButton) {
         delegate?.itemAddedToCart(at: index)
     }
-
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
+    
+    func configureWithItem(item: Item) {
+        nameLabel.text = item.name
+        descriptionLabel.text = "$ \(item.price ?? 0)"
+        itemImageView.downloaded(from: item.imageUrl ?? "")
     }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
-    }
-
 }

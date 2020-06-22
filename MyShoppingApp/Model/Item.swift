@@ -12,8 +12,5 @@ struct Item {
     var name: String?
     var imageUrl: String?
     var description: String?
-}
-
-extension Item : Equatable, Hashable {
-    
+    var price: Float?
 }
